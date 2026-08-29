@@ -48,23 +48,35 @@ export async function generateSpecificationFromUnderstanding(
     null,
     2,
   )
-  const { object } = await generateObject({
-    model: MODEL,
-    schema: ApplicationSpecificationSchema,
-    system: SPEC_SYSTEM,
-    prompt: `<website_understanding>\n${context}\n</website_understanding>\n\nProduce the ApplicationSpecification for the working application this website should become.`,
-  })
-  logger.info("analysis.specification", "generated from understanding", { type: object.applicationType })
-  return ensureFeatureCatalog(object)
+  try {
+    const { object } = await generateObject({
+      model: MODEL,
+      schema: ApplicationSpecificationSchema,
+      system: SPEC_SYSTEM,
+      prompt: `<website_understanding>\n${context}\n</website_understanding>\n\nProduce the ApplicationSpecification for the working application this website should become.`,
+    })
+    logger.info("analysis.specification", "generated from understanding", { type: object.applicationType })
+    return ensureFeatureCatalog(object)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error"
+    logger.error("analysis.specification", "failed to generate from understanding", { message })
+    throw new Error(`Failed to generate application specification: ${message}`)
+  }
 }
 
 export async function generateSpecificationFromIdea(idea: string): Promise<ApplicationSpecification> {
-  const { object } = await generateObject({
-    model: MODEL,
-    schema: ApplicationSpecificationSchema,
-    system: SPEC_SYSTEM,
-    prompt: `<user_idea>\n${idea}\n</user_idea>\n\nProduce the ApplicationSpecification for this application idea.`,
-  })
-  logger.info("analysis.specification", "generated from idea", { type: object.applicationType })
-  return ensureFeatureCatalog(object)
+  try {
+    const { object } = await generateObject({
+      model: MODEL,
+      schema: ApplicationSpecificationSchema,
+      system: SPEC_SYSTEM,
+      prompt: `<user_idea>\n${idea}\n</user_idea>\n\nProduce the ApplicationSpecification for this application idea.`,
+    })
+    logger.info("analysis.specification", "generated from idea", { type: object.applicationType })
+    return ensureFeatureCatalog(object)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error"
+    logger.error("analysis.specification", "failed to generate from idea", { message })
+    throw new Error(`Failed to generate application specification: ${message}`)
+  }
 }
