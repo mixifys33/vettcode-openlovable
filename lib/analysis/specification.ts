@@ -1,10 +1,15 @@
 import "server-only"
+import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { generateObject } from "ai"
 import { logger } from "@/lib/logging/logger"
 import { ApplicationSpecificationSchema, DEFAULT_FEATURES, type ApplicationSpecification } from "@/lib/types/specification"
 import type { ProjectUnderstanding } from "@/lib/types/understanding"
 
-const MODEL = "google/gemini-3-flash"
+const openrouter = createOpenRouter({
+  apiKey: process.env.OPENROUTER_API_KEY,
+})
+
+const MODEL = process.env.OPENROUTER_MODEL || "google/gemini-3-flash"
 
 const SPEC_SYSTEM = [
   "You are MirrorSite's application planning engine.",
@@ -50,7 +55,7 @@ export async function generateSpecificationFromUnderstanding(
   )
   try {
     const { object } = await generateObject({
-      model: MODEL,
+      model: openrouter(MODEL),
       schema: ApplicationSpecificationSchema,
       system: SPEC_SYSTEM,
       prompt: `<website_understanding>\n${context}\n</website_understanding>\n\nProduce the ApplicationSpecification for the working application this website should become.`,
@@ -67,7 +72,7 @@ export async function generateSpecificationFromUnderstanding(
 export async function generateSpecificationFromIdea(idea: string): Promise<ApplicationSpecification> {
   try {
     const { object } = await generateObject({
-      model: MODEL,
+      model: openrouter(MODEL),
       schema: ApplicationSpecificationSchema,
       system: SPEC_SYSTEM,
       prompt: `<user_idea>\n${idea}\n</user_idea>\n\nProduce the ApplicationSpecification for this application idea.`,
